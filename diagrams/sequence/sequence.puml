@@ -1,0 +1,7 @@
+@startuml clas_sequence
+[*] --> New
+New --> Processing : Start Processing
+Processing --> Shipped : Ship Order
+Shipped --> Delivered : Deliver Order
+Delivered --> [*]
+@enduml
