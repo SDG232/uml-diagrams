@@ -1,0 +1,17 @@
+@startuml step1
+actor Customer
+participant WebUI
+participant OrderController
+participant PaymentService
+database Database
+
+Customer -> WebUI: InitiateOrder(orderDetails)
+WebUI -> OrderController: processOrder(orderDetails)
+OrderController -> Database: saveOrder(orderDetails)
+Database --> OrderController: orderSaved
+OrderController -> PaymentService: processPayment(paymentinfo)
+PaymentService --> OrderController: paymentResult
+OrderController --> WebUI: orderConfirmation(confirmationDetails)
+WebUI --> Customer: displayConfirmation(confirmationDetails)
+
+@enduml
