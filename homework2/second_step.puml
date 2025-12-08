@@ -9,32 +9,40 @@ participant PaymentService
 database Database 
 participant NotificationService
 
+
 group "Оформление заказа" 
     Customer -> WebUI: InitiateOrder(orderDetails)
+    activate Customer
     WebUI -> OrderController: processOrder(orderDetails)
+    activate WebUI
     activate OrderController
-    OrderController -> Database: saveOrder(orderDetails) #green
-    Database --> OrderController: orderSaved #green
-    deactivate OrderController
+    OrderController -> Database: saveOrder(orderDetails)
+    activate Database 
+    Database --[#green]> OrderController: orderSaved 
+    deactivate Database
+
 end
 
 group "Оплата" 
-  activate OrderController
+
   OrderController -> PaymentService: processPayment(paymentinfo)
   activate PaymentService
   alt successful payment
     PaymentService --[#green]> OrderController : paymentSuccess(paymentConfirmation)
     PaymentService --[#LightBlue]> NotificationService : sendOrderNotification(orderId)
   else payment failed
-    PaymentService --[#red]> OrderController: paymentFailure(errorMessage) 
+    PaymentService --[#red]> OrderController: paymentFailure(errorMessage)
+    deactivate PaymentService 
   end
-  deactivate PaymentService
-  deactivate OrderController
+
 end
 
 group "Подтверждение" 
   OrderController --> WebUI: orderConfirmation(confirmationDetails)
+  deactivate OrderController
   WebUI --> Customer: displayConfirmation(confirmationDetails)
+  deactivate WebUI
+  deactivate Customer
 end
 
 @enduml

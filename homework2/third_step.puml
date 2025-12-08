@@ -1,0 +1,66 @@
+@startuml step3
+skinparam databaseBackgroundColor #yellow
+
+actor Customer
+participant WebUI
+participant OrderController
+participant PaymentService
+database Database 
+participant NotificationService
+
+activate  Customer
+group "Изменение корзины"
+  Customer -> WebUI: updateCartItem(itemDetails, action)
+  activate WebUI
+  WebUI -> OrderController: updateCart(itemDetails, action)
+  activate OrderController
+  OrderController -> Database: updateCartItems(itemDetails, action)
+  activate Database 
+  Database --[#green]> OrderController: cartUpdated 
+  deactivate Database 
+  OrderController --[#green]> WebUI: notidyCartUpdate(cartStatus)
+  deactivate OrderController
+  deactivate WebUI
+end
+note right: Покупатель меняет количество/удаляет/добавляет товары
+
+group "Уведомление менеджера"
+  NotificationService -> WebUI: managerNotification(orderId,status)
+end
+note right: Менеджер получает уведомление о новом заказе
+
+group "Оформление заказа" 
+  Customer -> WebUI: InitiateOrder(orderDetails)
+  WebUI -> OrderController: processOrder(orderDetails)
+  activate OrderController
+  activate WebUI
+  OrderController -> Database: saveOrder(orderDetails) 
+  Database --[#green]> OrderController: orderSaved 
+  
+end
+note right: Заказ в статусе "Ожидание оплаты"
+
+group "Оплата" 
+  OrderController -> PaymentService: processPayment(paymentinfo)
+  activate PaymentService
+  alt successful payment
+    PaymentService --[#green]> OrderController : paymentSuccess(paymentConfirmation)
+    PaymentService --[#LightBlue]> NotificationService : sendOrderNotification(orderId)
+  else payment failed
+    PaymentService --[#red]> OrderController: paymentFailure(errorMessage)
+    deactivate PaymentService 
+    end
+
+end
+note right: При ошибке заказ остается черновиком
+
+group "Подтверждение" 
+  OrderController --> WebUI: orderConfirmation(confirmationDetails)
+  deactivate OrderController
+  WebUI --> Customer: displayConfirmation(confirmationDetails)
+  deactivate WebUI
+  deactivate Customer
+end
+
+
+@enduml
