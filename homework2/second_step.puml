@@ -26,7 +26,7 @@ group "Оплата"
     PaymentService --[#green]> OrderController : paymentSuccess(paymentConfirmation)
     PaymentService --[#LightBlue]> NotificationService : sendOrderNotification(orderId)
   else payment failed
-    PaymentService --[#red]> OrderController: paymentError 
+    PaymentService --[#red]> OrderController: paymentFailure(errorMessage) 
   end
   deactivate PaymentService
   deactivate OrderController
