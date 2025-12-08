@@ -1,0 +1,40 @@
+@startuml step2
+skinparam databaseBackgroundColor #yellow
+
+
+actor Customer
+participant WebUI
+participant OrderController
+participant PaymentService
+database Database 
+participant NotificationService
+
+group "Оформление заказа" 
+    Customer -> WebUI: InitiateOrder(orderDetails)
+    WebUI -> OrderController: processOrder(orderDetails)
+    activate OrderController
+    OrderController -> Database: saveOrder(orderDetails) #green
+    Database --> OrderController: orderSaved #green
+    deactivate OrderController
+end
+
+group "Оплата" 
+  activate OrderController
+  OrderController -> PaymentService: processPayment(paymentinfo)
+  activate PaymentService
+  alt successful payment
+    PaymentService --[#green]> OrderController : paymentSuccess(paymentConfirmation)
+    PaymentService --[#LightBlue]> NotificationService : sendOrderNotification(orderId)
+  else payment failed
+    PaymentService --[#red]> OrderController: paymentError 
+  end
+  deactivate PaymentService
+  deactivate OrderController
+end
+
+group "Подтверждение" 
+  OrderController --> WebUI: orderConfirmation(confirmationDetails)
+  WebUI --> Customer: displayConfirmation(confirmationDetails)
+end
+
+@enduml
