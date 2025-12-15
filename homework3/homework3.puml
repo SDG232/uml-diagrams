@@ -1,0 +1,50 @@
+@startuml ООП
+!theme plain
+
+abstract class Payment {
+  - amount: double
+  - paymentDate: Date
+  - transactionId: String
+  --
+  + getAmount(): double
+  + getPaymentDate(): Date
+  + getTransactionId(): String
+  + setTransactionId(id: String): void
+  + {abstract} processPayment(): boolean
+}
+
+class CashPayment {
+  - cashProvided: double
+  --
+  + getCashProvided(): double
+  + setCashProvided(amount: double): void
+  + calculateChange(): double
+  + processPayment(): boolean
+}
+
+class CardPayment {
+  - cardNumber: String
+  - cardHolderName: String
+  - expiryDate: String
+  --
+  + getCardNumber(): String
+  + getCardHolderName(): String
+  + getExpiryDate(): String
+  + setCardDetails(number: String, name: String, expiry: String): void
+  + validateCard(): boolean
+  + processPayment(): boolean
+}
+
+class PaymentManager {
+  - payments: List<Payment>
+  --
+  + addPayment(payment: Payment): void
+  + processAllPayments(): boolean
+  + getPaymentsCount(): int
+}
+
+CashPayment -|> Payment
+CardPayment -|> Payment
+PaymentManager *--> "many" Payment
+
+@enduml
