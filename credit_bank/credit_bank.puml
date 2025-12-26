@@ -1,0 +1,64 @@
+@startuml Рассмотрение кредитной заявки
+!define RECTANGLE class
+
+
+skinparam actor {
+    BackgroundColor LightBlue
+    BorderColor DarkSlateGray
+}
+
+
+skinparam usecase {
+    BackgroundColor LightGreen
+    BorderColor DarkSlateGray
+}
+
+
+title Рассмотрение кредитной заявки
+
+
+actor "Клиент" as Client
+actor "Кредитный менеджер" as Credit_Manager
+actor "Служба безопасности" as Security_Service
+actor "Бюро кредитных историй" as Credit_Bureau
+actor "Страховая компания" as Insurance_Company
+actor "Оценочная компания" as Appraisal_Company
+actor "ВИП-клиент" as VIP_client
+
+rectangle "Система банка" {
+  usecase "Рассмотрение кредитной заявки" as Review
+  usecase "Подать заявку" as Apply
+  usecase "Оформить страховку" as Insurance
+  usecase "Предоставить залог" as Collateral
+  usecase "Провести проверку" as Check
+  usecase "Проверить документы" as CheckDocs
+  usecase "Проверить кредитную историю" as CheckHistory
+  usecase "Провести проверку безопасности" as CheckSecurity
+  usecase "Оценить залог" as Appraise
+}
+
+
+Client --> Apply
+VIP_client --> Apply
+Credit_Manager --> Review
+Security_Service --> CheckSecurity
+Credit_Bureau --> CheckHistory
+Insurance_Company --> Insurance
+Appraisal_Company --> Appraise
+
+
+Client <|-- VIP_client 
+Check <|-- CheckDocs 
+
+
+Review .> Check : <<include>>
+
+
+Apply <. Insurance : <<extend>>
+Apply <. Collateral : <<extend>>
+CheckHistory .> Check : <<extend>>
+CheckDocs .> Check : <<extend>>
+Collateral <. Appraise : <<extend>>
+CheckSecurity .> Review : <<extend>>
+
+@enduml
